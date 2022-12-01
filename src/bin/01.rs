@@ -12,29 +12,29 @@ pub fn part_one(input: &str) -> Option<u32> {
             cur_vec = Vec::new();
         }
     }
+    pack_sums.push(cur_vec.iter().sum()); // Add last pack
 
     pack_sums.iter().max().copied()
-
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let lines = input.lines();
 
-    let mut packs: Vec<Vec<u32>> = Vec::new();
+    let mut pack_sums: Vec<u32> = Vec::new();
     let mut cur_vec: Vec<u32> = Vec::new();
 
     for l in lines {
         if !l.is_empty() {
             cur_vec.push(l.parse::<u32>().ok()?);
         } else {
-            packs.push(cur_vec.to_owned());
+            pack_sums.push(cur_vec.iter().sum());
             cur_vec = Vec::new();
         }
     }
+    pack_sums.push(cur_vec.iter().sum()); // Add last pack
 
-    let mut sums: Vec<u32> = packs.iter().map(|v| v.iter().sum()).collect();
-    sums.sort_by(|a, b| b.cmp(a));
-    Some(sums.iter().take(3).sum())
+    pack_sums.sort_by(|a, b| b.cmp(a));
+    Some(pack_sums.iter().take(3).sum())
 }
 
 fn main() {
