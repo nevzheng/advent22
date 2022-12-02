@@ -1,66 +1,103 @@
-const OP_ROCK: &str = "A";
-const OP_PAPER: &str = "B";
-const OP_SCISSORS: &str = "C";
+enum Move {
+    Rock,
+    Paper,
+    Scissors,
+}
 
-const MY_ROCK: &str = "X";
-const MY_PAPER: &str = "Y";
-const MY_SCISSORS: &str = "Z";
-
-const MY_LOSS: &str = "X";
-const MY_DRAW: &str = "Y";
-const MY_WIN: &str = "Z";
-
-pub fn part_one(input: &str) -> Option<u32> {
-    let strategy_guide: Vec<(&str, &str)> =
-        input.lines().map(|l| l.split_once(' ').unwrap()).collect();
-
-    let mut score = 0;
-
-    for (opponent_play, our_play) in strategy_guide {
-        match (opponent_play, our_play) {
-            (OP_ROCK, MY_ROCK) => score += 1 + 3,
-            (OP_ROCK, MY_PAPER) => score += 2 + 6,
-            (OP_ROCK, MY_SCISSORS) => score += 3 + 0,
-
-            (OP_PAPER, MY_ROCK) => score += 1 + 0,
-            (OP_PAPER, MY_PAPER) => score += 2 + 3,
-            (OP_PAPER, MY_SCISSORS) => score += 3 + 6,
-
-            (OP_SCISSORS, MY_ROCK) => score += 1 + 6,
-            (OP_SCISSORS, MY_PAPER) => score += 2 + 0,
-            (OP_SCISSORS, MY_SCISSORS) => score += 3 + 3,
-            _ => panic!("Incorrect Input."),
+impl Move {
+    fn from(c: &str) -> Move {
+        match c {
+            "A" | "X" => Move::Rock,
+            "B" | "Y" => Move::Paper,
+            "C" | "Z" => Move::Scissors,
+            _ => panic!("Invalid Value"),
         }
     }
 
-    Some(score)
+    fn move_score(&self) -> u32 {
+        match self {
+            Move::Rock => 1,
+            Move::Paper => 2,
+            Move::Scissors => 3,
+        }
+    }
+}
+
+enum Outcome {
+    Win,
+    Loss,
+    Draw,
+}
+
+impl Outcome {
+    fn from(c: &str) -> Outcome {
+        match c {
+            "X" => Outcome::Loss,
+            "Y" => Outcome::Draw,
+            "Z" => Outcome::Win,
+            _ => panic!("Invalid Value"),
+        }
+    }
+
+    fn outcome_score(&self) -> u32 {
+        match self {
+            Outcome::Win => 6,
+            Outcome::Loss => 0,
+            Outcome::Draw => 3,
+        }
+    }
+}
+
+pub fn part_one(input: &str) -> Option<u32> {
+    Some(
+        input
+            .lines()
+            .map(|l| {
+                let (a, b) = l.split_once(' ').unwrap();
+                (Move::from(a), Move::from(b))
+            })
+            .map(|(opponent, me)| {
+                me.move_score()
+                    + (match (opponent, me) {
+                        (Move::Rock, Move::Rock) => 3,
+                        (Move::Rock, Move::Paper) => 6,
+                        (Move::Rock, Move::Scissors) => 0,
+                        (Move::Paper, Move::Rock) => 0,
+                        (Move::Paper, Move::Paper) => 3,
+                        (Move::Paper, Move::Scissors) => 6,
+                        (Move::Scissors, Move::Rock) => 6,
+                        (Move::Scissors, Move::Paper) => 0,
+                        (Move::Scissors, Move::Scissors) => 3,
+                    })
+            })
+            .sum(),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let strategy_guide: Vec<(&str, &str)> =
-        input.lines().map(|l| l.split_once(' ').unwrap()).collect();
-
-    let mut score = 0;
-
-    for (opponent_play, our_play) in strategy_guide {
-        match (opponent_play, our_play) {
-            (OP_ROCK, MY_WIN) => score += 6 + 2,
-            (OP_PAPER, MY_WIN) => score += 6 + 3,
-            (OP_SCISSORS, MY_WIN) => score += 6 + 1,
-
-            (OP_ROCK, MY_LOSS) => score += 3,
-            (OP_PAPER, MY_LOSS) => score += 1,
-            (OP_SCISSORS, MY_LOSS) => score += 2,
-
-            (OP_ROCK, MY_DRAW) => score += 3 + 1,
-            (OP_PAPER, MY_DRAW) => score += 3 + 2,
-            (OP_SCISSORS, MY_DRAW) => score += 3 + 3,
-
-            _ => panic!("Incorrect Input."),
-        }
-    }
-
-    Some(score)
+    Some(
+        input
+            .lines()
+            .map(|l| {
+                let (a, b) = l.split_once(' ').unwrap();
+                (Move::from(a), Outcome::from(b))
+            })
+            .map(|(opponent, me)| {
+                me.outcome_score()
+                    + match (opponent, &me) {
+                        (Move::Rock, Outcome::Win) => Move::Paper.move_score(),
+                        (Move::Rock, Outcome::Loss) => Move::Scissors.move_score(),
+                        (Move::Rock, Outcome::Draw) => Move::Rock.move_score(),
+                        (Move::Paper, Outcome::Win) => Move::Scissors.move_score(),
+                        (Move::Paper, Outcome::Loss) => Move::Rock.move_score(),
+                        (Move::Paper, Outcome::Draw) => Move::Paper.move_score(),
+                        (Move::Scissors, Outcome::Win) => Move::Rock.move_score(),
+                        (Move::Scissors, Outcome::Loss) => Move::Paper.move_score(),
+                        (Move::Scissors, Outcome::Draw) => Move::Scissors.move_score(),
+                    }
+            })
+            .sum(),
+    )
 }
 
 fn main() {
