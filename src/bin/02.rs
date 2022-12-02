@@ -56,9 +56,9 @@ pub fn part_one(input: &str) -> Option<u32> {
                 let (a, b) = l.split_once(' ').unwrap();
                 (Move::from(a), Move::from(b))
             })
-            .map(|(opponent, me)| {
-                me.score()
-                    + (match (opponent, me) {
+            .map(|(opponent_move, my_move)| {
+                my_move.score()
+                    + (match (opponent_move, my_move) {
                         (Move::Rock, Move::Rock) => Outcome::Draw.score(),
                         (Move::Rock, Move::Paper) => Outcome::Win.score(),
                         (Move::Rock, Move::Scissors) => Outcome::Loss.score(),
@@ -82,9 +82,9 @@ pub fn part_two(input: &str) -> Option<u32> {
                 let (a, b) = l.split_once(' ').unwrap();
                 (Move::from(a), Outcome::from(b))
             })
-            .map(|(opponent, me)| {
-                me.score()
-                    + match (opponent, &me) {
+            .map(|(opponent_move, desired_outcome)| {
+                desired_outcome.score()
+                    + match (opponent_move, &desired_outcome) {
                         (Move::Rock, Outcome::Win) => Move::Paper.score(),
                         (Move::Rock, Outcome::Loss) => Move::Scissors.score(),
                         (Move::Rock, Outcome::Draw) => Move::Rock.score(),
