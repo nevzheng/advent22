@@ -14,7 +14,7 @@ impl Move {
         }
     }
 
-    fn move_score(&self) -> u32 {
+    fn score(&self) -> u32 {
         match self {
             Move::Rock => 1,
             Move::Paper => 2,
@@ -39,7 +39,7 @@ impl Outcome {
         }
     }
 
-    fn outcome_score(&self) -> u32 {
+    fn score(&self) -> u32 {
         match self {
             Outcome::Win => 6,
             Outcome::Loss => 0,
@@ -57,17 +57,17 @@ pub fn part_one(input: &str) -> Option<u32> {
                 (Move::from(a), Move::from(b))
             })
             .map(|(opponent, me)| {
-                me.move_score()
+                me.score()
                     + (match (opponent, me) {
-                        (Move::Rock, Move::Rock) => 3,
-                        (Move::Rock, Move::Paper) => 6,
-                        (Move::Rock, Move::Scissors) => 0,
-                        (Move::Paper, Move::Rock) => 0,
-                        (Move::Paper, Move::Paper) => 3,
-                        (Move::Paper, Move::Scissors) => 6,
-                        (Move::Scissors, Move::Rock) => 6,
-                        (Move::Scissors, Move::Paper) => 0,
-                        (Move::Scissors, Move::Scissors) => 3,
+                        (Move::Rock, Move::Rock) => Outcome::Draw.score(),
+                        (Move::Rock, Move::Paper) => Outcome::Win.score(),
+                        (Move::Rock, Move::Scissors) => Outcome::Loss.score(),
+                        (Move::Paper, Move::Rock) => Outcome::Loss.score(),
+                        (Move::Paper, Move::Paper) => Outcome::Draw.score(),
+                        (Move::Paper, Move::Scissors) => Outcome::Win.score(),
+                        (Move::Scissors, Move::Rock) => Outcome::Win.score(),
+                        (Move::Scissors, Move::Paper) => Outcome::Loss.score(),
+                        (Move::Scissors, Move::Scissors) => Outcome::Draw.score(),
                     })
             })
             .sum(),
@@ -83,17 +83,17 @@ pub fn part_two(input: &str) -> Option<u32> {
                 (Move::from(a), Outcome::from(b))
             })
             .map(|(opponent, me)| {
-                me.outcome_score()
+                me.score()
                     + match (opponent, &me) {
-                        (Move::Rock, Outcome::Win) => Move::Paper.move_score(),
-                        (Move::Rock, Outcome::Loss) => Move::Scissors.move_score(),
-                        (Move::Rock, Outcome::Draw) => Move::Rock.move_score(),
-                        (Move::Paper, Outcome::Win) => Move::Scissors.move_score(),
-                        (Move::Paper, Outcome::Loss) => Move::Rock.move_score(),
-                        (Move::Paper, Outcome::Draw) => Move::Paper.move_score(),
-                        (Move::Scissors, Outcome::Win) => Move::Rock.move_score(),
-                        (Move::Scissors, Outcome::Loss) => Move::Paper.move_score(),
-                        (Move::Scissors, Outcome::Draw) => Move::Scissors.move_score(),
+                        (Move::Rock, Outcome::Win) => Move::Paper.score(),
+                        (Move::Rock, Outcome::Loss) => Move::Scissors.score(),
+                        (Move::Rock, Outcome::Draw) => Move::Rock.score(),
+                        (Move::Paper, Outcome::Win) => Move::Scissors.score(),
+                        (Move::Paper, Outcome::Loss) => Move::Rock.score(),
+                        (Move::Paper, Outcome::Draw) => Move::Paper.score(),
+                        (Move::Scissors, Outcome::Win) => Move::Rock.score(),
+                        (Move::Scissors, Outcome::Loss) => Move::Paper.score(),
+                        (Move::Scissors, Outcome::Draw) => Move::Scissors.score(),
                     }
             })
             .sum(),
