@@ -28,7 +28,7 @@ pub fn part_two(input: &str) -> Option<u32> {
 
         let m = find_match(a, b, c);
         score_match(m)
-    }).sum::<u32>());
+    }).sum::<u32>())
 }
 
 fn score_match(m: u8) ->u32{
@@ -41,7 +41,7 @@ fn score_match(m: u8) ->u32{
 
 fn find_match(a: &str, b: &str, c: &str) -> u8 {
     let a_set = a.bytes().collect::<HashSet<_>>();
-    let b_set = a.bytes().collect::<HashSet<_>>();
+    let b_set = b.bytes().collect::<HashSet<_>>();
 
     c.bytes().find(|z| a_set.contains(z) && b_set.contains(z)).unwrap()
 }
