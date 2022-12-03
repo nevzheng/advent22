@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 pub fn part_one(input: &str) -> Option<u32> {
     Some(
         input
@@ -5,19 +7,11 @@ pub fn part_one(input: &str) -> Option<u32> {
             .map(|l| {
                 let (a, b): (&str, &str) = l.split_at(l.len() / 2);
 
-                for x in a.bytes() {
-                    for y in b.bytes() {
-                        if x == y {
-                            if x.is_ascii_lowercase() {
-                                return x as u32 - 'a' as u32 + 1;
-                            } else {
-                                return x as u32 - 'A' as u32 + 1 + 26;
-                            }
-                        }
-                    }
-                }
+                let a_set = a.bytes().collect::<HashSet<_>>();
 
-                0u32
+                let c = b.bytes().find(|c| a_set.contains(c)).unwrap();
+
+                score_match(c)
             })
             .sum::<u32>(),
     )
@@ -26,34 +20,30 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let lines: Vec<_> = input.lines().collect();
 
-    let mut score = 0;
-    for v in lines.chunks(3) {
+    Some(lines.chunks(3).map(|v|{
+
         let a = v[0];
         let b = v[1];
         let c = v[2];
 
-        let m = find_match(a, b, c, &mut score);
-        if m.is_ascii_lowercase() {
-            score += m as u32 - 'a' as u32 + 1;
-        } else {
-            score += m as u32 - 'A' as u32 + 1 + 26;
-        }
-    }
-
-    Some(score)
+        let m = find_match(a, b, c);
+        score_match(m)
+    }).sum::<u32>());
 }
 
-fn find_match(a: &str, b: &str, c: &str, score: &mut u32) -> u8 {
-    for x in a.bytes() {
-        for y in b.bytes() {
-            for z in c.bytes() {
-                if x == y && x == z {
-                    return x;
-                }
-            }
-        }
+fn score_match(m: u8) ->u32{
+    if m.is_ascii_lowercase() {
+        m as u32 - 'a' as u32 + 1
+    } else {
+        m as u32 - 'A' as u32 + 1 + 26
     }
-    0
+}
+
+fn find_match(a: &str, b: &str, c: &str) -> u8 {
+    let a_set = a.bytes().collect::<HashSet<_>>();
+    let b_set = a.bytes().collect::<HashSet<_>>();
+
+    c.bytes().find(|z| a_set.contains(z) && b_set.contains(z)).unwrap()
 }
 
 fn main() {
