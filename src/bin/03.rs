@@ -32,7 +32,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         let b = v[1];
         let c = v[2];
 
-        let m = find_match(a, b, c);
+        let m = find_match(a, b, c, &mut score);
         if m.is_ascii_lowercase() {
             score += m as u32 - 'a' as u32 + 1;
         } else {
@@ -43,7 +43,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(score)
 }
 
-fn find_match(a: &str, b: &str, c: &str) -> u8 {
+fn find_match(a: &str, b: &str, c: &str, score: &mut u32) -> u8 {
     for x in a.bytes() {
         for y in b.bytes() {
             for z in c.bytes() {
