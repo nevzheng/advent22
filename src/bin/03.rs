@@ -1,4 +1,39 @@
+#![feature(iter_array_chunks)]
+
 use std::collections::HashSet;
+
+fn unique_items(sack: &str) -> u64 {
+    sack.bytes()
+        .map(|c| match c {
+            b'a'..=b'z' => 1 + c - b'a',
+            b'A'..=b'Z' => 1 + c - b'A',
+            _ => unreachable!(),
+        })
+        .fold(0, |acc, n| acc | (1 << n))
+}
+
+pub fn part_one_bitwise(input: &str) -> Option<u32> {
+    Some(
+        input
+            .lines()
+            .map(|l| l.split_at(l.len() / 2))
+            .map(|(l, r)| [l, r].map(unique_items))
+            .map(|[l, r]| u64::trailing_zeros(l & r))
+            .sum(),
+    )
+}
+
+pub fn part_two_bitwise(input: &str) -> Option<u32> {
+    Some(
+        input
+            .lines()
+            .array_chunks::<3>()
+            .map(|v| v.map(unique_items))
+            .map(|[a, b, c]| a & b & c)
+            .map(u64::trailing_zeros)
+            .sum(),
+    )
+}
 
 pub fn part_one(input: &str) -> Option<u32> {
     Some(
@@ -72,5 +107,17 @@ mod tests {
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 3);
         assert_eq!(part_two(&input), Some(70));
+    }
+
+    #[test]
+    fn test_part_one_bitwise() {
+        let input = advent_of_code::read_file("examples", 3);
+        assert_eq!(part_one_bitwise(&input), Some(157));
+    }
+
+    #[test]
+    fn test_part_two_bitwise() {
+        let input = advent_of_code::read_file("examples", 3);
+        assert_eq!(part_two_bitwise(&input), Some(70));
     }
 }
