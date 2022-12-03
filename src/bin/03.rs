@@ -20,18 +20,22 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let lines: Vec<_> = input.lines().collect();
 
-    Some(lines.chunks(3).map(|v|{
+    Some(
+        lines
+            .chunks(3)
+            .map(|v| {
+                let a = v[0];
+                let b = v[1];
+                let c = v[2];
 
-        let a = v[0];
-        let b = v[1];
-        let c = v[2];
-
-        let m = find_match(a, b, c);
-        score_match(m)
-    }).sum::<u32>())
+                let m = find_match(a, b, c);
+                score_match(m)
+            })
+            .sum::<u32>(),
+    )
 }
 
-fn score_match(m: u8) ->u32{
+fn score_match(m: u8) -> u32 {
     if m.is_ascii_lowercase() {
         m as u32 - 'a' as u32 + 1
     } else {
@@ -43,7 +47,9 @@ fn find_match(a: &str, b: &str, c: &str) -> u8 {
     let a_set = a.bytes().collect::<HashSet<_>>();
     let b_set = b.bytes().collect::<HashSet<_>>();
 
-    c.bytes().find(|z| a_set.contains(z) && b_set.contains(z)).unwrap()
+    c.bytes()
+        .find(|z| a_set.contains(z) && b_set.contains(z))
+        .unwrap()
 }
 
 fn main() {
