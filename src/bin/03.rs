@@ -6,7 +6,7 @@ fn unique_items(sack: &str) -> u64 {
     sack.bytes()
         .map(|c| match c {
             b'a'..=b'z' => 1 + c - b'a',
-            b'A'..=b'Z' => 1 + c - b'A',
+            b'A'..=b'Z' => 27 + c - b'A',
             _ => unreachable!(),
         })
         .fold(0, |acc, n| acc | (1 << n))
