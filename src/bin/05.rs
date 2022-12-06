@@ -39,15 +39,11 @@ pub fn part_two(input: &str) -> Option<String> {
     let instructions = parse_instructions(instructions_str);
 
     for ins in instructions {
-        let mut buffer = Vec::new();
-        for _ in 0..ins.count {
-            let c = state.get_mut(&ins.src).unwrap().pop().unwrap();
-            buffer.push(c)
-        }
+        let src = state.get_mut(&ins.src).unwrap();
+        let at = src.len() - ins.count as usize;
 
-        buffer.reverse();
-
-        state.get_mut(&ins.dst).unwrap().extend(buffer);
+        let sp = src.split_off(at);
+        state.get_mut(&ins.dst).unwrap().extend(sp);
     }
 
     let mut answer = String::new();
