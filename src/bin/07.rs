@@ -15,7 +15,6 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(sizes.into_values().filter(|v| v < &100_000).sum())
 }
 
-const GOAL: u32 = 30_000_000;
 pub fn part_two(input: &str) -> Option<u32> {
     let file_tree = parse_file_tree(input)?;
 
