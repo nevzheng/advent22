@@ -1,12 +1,16 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+};
 
 use sscanf::sscanf;
 
 pub fn part_one(input: &str) -> Option<u32> {
     let file_tree = parse_file_tree(input)?;
 
+    let mut stack: PathBuf = PathBuf::new();
     let mut sizes: HashMap<String, u32> = HashMap::new();
-    subtree_sums(&file_tree, "/", &mut sizes);
+    subtree_sums(&file_tree, "/", &mut sizes, &mut stack);
     Some(sizes.into_values().filter(|v| v < &100_000).sum())
 }
 
@@ -18,38 +22,48 @@ fn subtree_sums(
     file_tree: &HashMap<String, HashSet<Node>>,
     cur: &str,
     sizes: &mut HashMap<String, u32>,
+    stack: &mut PathBuf,
 ) -> u32 {
-    // if let Some(&subtree_sum) = sizes.get(cur) {
-    if let Some(_) = sizes.get(cur) {
-        panic!("I think I found a loop.");
-        // return subtree_sum;
-    }
+    // Save cur to stack.
+    stack.push(cur);
 
-    dbg!(file_tree.get(cur).unwrap());
+    // Use Full Path to query file tree.
+    let cur_full_path = stack.to_str().unwrap().to_owned();
+    assert!(
+        sizes.get(&cur_full_path).is_none(),
+        "We can only visit each directory once.",
+    );
 
+    // Recurse and Sum Children.
     let subtree_sum = file_tree
-        .get(cur)
+        .get(&cur_full_path)
         .unwrap()
         .iter()
         .map(|e| match e {
-            Node::Directory(dir_name) => subtree_sums(file_tree, dir_name, sizes),
+            Node::Directory(dir_name) => subtree_sums(file_tree, dir_name, sizes, stack),
             Node::File(_, size) => *size,
         })
         .sum();
+
     // Populate subtree sum bottom up.
-    assert!(sizes.insert(cur.to_owned(), subtree_sum).is_none());
+    assert!(
+        sizes.insert(cur_full_path, subtree_sum).is_none(),
+        "Paths must be unique"
+    );
+    // Pop current dir off stack.
+    stack.pop();
     subtree_sum
 }
 
 fn parse_file_tree(input: &str) -> Option<HashMap<String, HashSet<Node>>> {
     let mut directories: HashMap<String, HashSet<Node>> = HashMap::new();
-    let mut stack: Vec<String> = Vec::new();
+    let mut path: PathBuf = PathBuf::new();
     let mut cur_dir: String = String::new();
     let mut ls_dir: String = String::new();
     for line in input.lines() {
         // A Line is A Command Or a Node
         if let Some(cmd) = parse_command(line) {
-            handle_commands(cmd, &mut cur_dir, &mut stack, &mut ls_dir);
+            handle_commands(cmd, &mut cur_dir, &mut path, &mut ls_dir);
         } else {
             // Add the Node to the current `ls_dir`
             let node = parse_node(line)?;
@@ -59,16 +73,10 @@ fn parse_file_tree(input: &str) -> Option<HashMap<String, HashSet<Node>>> {
                 .insert(node);
         }
     }
-    dbg!(&directories);
     Some(directories)
 }
 
-fn handle_commands(
-    cmd: Command,
-    cur_dir: &mut String,
-    stack: &mut Vec<String>,
-    ls_dir: &mut String,
-) {
+fn handle_commands(cmd: Command, cur_dir: &mut String, stack: &mut PathBuf, ls_dir: &mut String) {
     match cmd {
         Command::Cd(dir_name) => handle_cd(dir_name, cur_dir, stack),
         Command::Ls(dir_name) => handle_ls(dir_name, cur_dir, ls_dir),
@@ -82,14 +90,15 @@ fn handle_ls(dir_name: Option<String>, cur_dir: &String, ls_dir: &mut String) {
     *ls_dir = dir;
 }
 
-fn handle_cd(dir_name: Option<String>, cur_dir: &mut String, stack: &mut Vec<String>) {
+fn handle_cd(dir_name: Option<String>, cur_dir: &mut String, stack: &mut PathBuf) {
     if let Some(dir) = dir_name {
         // Save on stack for back tracking.
-        stack.push(dir.to_owned());
-        *cur_dir = dir;
+        stack.push(&dir);
+        *cur_dir = stack.to_str().unwrap().to_owned();
     } else {
         // None means `cd ..`, pop & set last directory on stack.
-        *cur_dir = stack.pop().unwrap()
+        stack.pop();
+        *cur_dir = stack.to_str().unwrap().to_owned();
     }
 }
 
