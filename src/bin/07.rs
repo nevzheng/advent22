@@ -23,10 +23,11 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut sizes: HashMap<String, u32> = HashMap::new();
     subtree_sums(&file_tree, "/", &mut sizes, &mut stack);
 
+    let root_size = *sizes.get("/").unwrap() as i32;
     sizes
         .into_values()
-        .filter(|d| d <= &GOAL)
-        .min_by(|a, b| (GOAL - a).cmp(&(GOAL - b)))
+        .filter(|s| (*s as i32) >= (&root_size - 40_000_000))
+        .min()
 }
 
 fn subtree_sums(
