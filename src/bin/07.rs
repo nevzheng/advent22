@@ -11,11 +11,22 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut stack: PathBuf = PathBuf::new();
     let mut sizes: HashMap<String, u32> = HashMap::new();
     subtree_sums(&file_tree, "/", &mut sizes, &mut stack);
+
     Some(sizes.into_values().filter(|v| v < &100_000).sum())
 }
 
+const GOAL: u32 = 30_000_000;
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let file_tree = parse_file_tree(input)?;
+
+    let mut stack: PathBuf = PathBuf::new();
+    let mut sizes: HashMap<String, u32> = HashMap::new();
+    subtree_sums(&file_tree, "/", &mut sizes, &mut stack);
+
+    sizes
+        .into_values()
+        .filter(|d| d <= &GOAL)
+        .min_by(|a, b| (GOAL - a).cmp(&(GOAL - b)))
 }
 
 fn subtree_sums(
@@ -163,6 +174,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 7);
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(24933642));
     }
 }
