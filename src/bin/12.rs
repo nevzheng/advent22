@@ -31,10 +31,57 @@ pub fn part_one(input: &str) -> Option<u32> {
                     continue;
                 }
 
-                // If start, add all neighbors.
-                // Else Check that its increaseing by 1.
                 if (grid[cx as usize][cy as usize] as u8) + 1
                     >= (grid[nx as usize][ny as usize] as u8)
+                {
+                    queue.push_front((nx, ny));
+                }
+            }
+        }
+        depth += 1;
+    }
+
+    None
+}
+
+pub fn part_two(input: &str) -> Option<u32> {
+    let (grid, height, width, _, dest) = read_grid(input);
+
+    // We're now starting at dest, the peak.
+    let mut queue: VecDeque<(isize, isize)> = VecDeque::from([dest]);
+    let mut visited: HashSet<(isize, isize)> = HashSet::new();
+    let mut depth: u32 = 0;
+
+    let deltas = [(1, 0), (-1, 0), (0, 1), (0, -1)];
+
+    while !queue.is_empty() {
+        let level_size = queue.len();
+        for _ in 0..level_size {
+            let (cx, cy) = queue.pop_back().unwrap();
+            if visited.contains(&(cx, cy)) {
+                continue;
+            }
+
+            visited.insert((cx, cy));
+
+            // Looking for the first 'a'
+            if grid[cx as usize][cy as usize] == 'a' {
+                return Some(depth);
+            }
+
+            for (dx, dy) in deltas.iter() {
+                let (nx, ny) = (cx + dx, cy + dy);
+
+                // Bounds Check
+                if nx < 0 || nx >= height || ny < 0 || ny >= width {
+                    continue;
+                }
+
+                // Flip the condition from a.
+                // Can't go down by more than 1, but can go up
+                // by any amount.
+                if (grid[cx as usize][cy as usize] as u8)
+                    <= (grid[nx as usize][ny as usize] as u8 + 1)
                 {
                     queue.push_front((nx, ny));
                 }
@@ -85,10 +132,6 @@ fn find_point(c: char, height: isize, width: isize, grid: &[Vec<char>]) -> Optio
     None
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    None
-}
-
 fn main() {
     let input = &advent_of_code::read_file("inputs", 12);
     advent_of_code::solve!(1, part_one, input);
@@ -108,6 +151,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 12);
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(29));
     }
 }
