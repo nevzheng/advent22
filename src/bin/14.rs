@@ -3,6 +3,8 @@ use std::{
     collections::HashSet,
 };
 
+const START_POINT: (i32, i32) = (500, 0);
+
 pub fn part_one(input: &str) -> Option<i32> {
     // Read all line segments into a map of points.
     let rocks: HashSet<(i32, i32)> = read_input(input);
@@ -12,7 +14,7 @@ pub fn part_one(input: &str) -> Option<i32> {
     // Find the min bound for the map.
     let max_y = *rocks.iter().map(|(_, y)| y).max().unwrap();
 
-    while let Some(stop_point) = simulate(&rocks, max_y, &sand) {
+    while let Some(stop_point) = simulate(&rocks, max_y, false, &sand) {
         sand.insert(stop_point);
     }
 
@@ -20,15 +22,31 @@ pub fn part_one(input: &str) -> Option<i32> {
 }
 
 pub fn part_two(input: &str) -> Option<i32> {
-    None
+    // Read all line segments into a map of points.
+    let rocks: HashSet<(i32, i32)> = read_input(input);
+    // Points where sand has accumulated.
+    let mut sand: HashSet<(i32, i32)> = HashSet::new();
+
+    // Find the min bound for the map.
+    let max_y = *rocks.iter().map(|(_, y)| y).max().unwrap();
+
+    while let Some(stop_point) = simulate(&rocks, max_y, true, &sand) {
+        sand.insert(stop_point);
+        if stop_point == START_POINT {
+            break;
+        }
+    }
+
+    Some(sand.len() as i32)
 }
 
 fn simulate(
     rocks: &HashSet<(i32, i32)>,
     max_y: i32,
+    use_floor: bool,
     sand: &HashSet<(i32, i32)>,
 ) -> Option<(i32, i32)> {
-    let start = (500i32, 0i32);
+    let start = START_POINT;
     let mut grain = start;
 
     while grain.1 <= max_y {
@@ -47,7 +65,11 @@ fn simulate(
         }
     }
 
-    None
+    if use_floor {
+        Some(grain)
+    } else {
+        None
+    }
 }
 
 fn read_input(input: &str) -> HashSet<(i32, i32)> {
